@@ -1,0 +1,117 @@
+{% extends 'shop/basic.html' %}
+{% block title%} Checkout{% endblock %}
+{% block body %}
+<div class="container">
+    <div class="col my-4">
+        <h2 class="my-4">People's Tree Checkout - Review Your Cart Items</h2>
+        <div class="my-4">
+            <ul class="list-group col" id="items">
+            </ul>
+
+            <p>
+                <li class="d-block p-2 bg-danger text-white">Your Cart Total is <b>Rs. <span
+                            id="totalprice"></span></b>.</li>
+            </p>
+
+        </div>
+        <div class="col my-4">
+            <p3>
+                <h2 class="my-4">Enter Details:</h2>
+            </p3>
+            <form method="post" action="/shop/checkout/">{% csrf_token %}
+                <input type="hidden" name="itemsJson" id="itemsJson">
+                <input type="hidden" name="amount" id="amount">
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="name">Name</label>
+                        <input type="name" class="form-control" id="name" name="name" placeholder="Name">
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <label for="email">E-Mail</label>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="Email">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" class="form-control" id="phone" name="phone">
+                </div>
+
+                <div class="form-group">
+                    <label for="address">Address</label>
+                    <input type="text" class="form-control" id="address" name="address"
+                        placeholder="Street no., Apartment, Building no. ...">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="inputCity">City</label>
+                        <input type="text" class="form-control" id="city" name="city">
+                    </div>
+
+                    <div class="form-group col-md-4">
+                        <label for="inputState">State</label>
+                        <input type="text" class="form-control" id="state" name="state" placeholder="Enter State">
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        <label for="inputZip">Zip</label>
+                        <input type="text" class="form-control" id="zip_code" name="zip_code">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-danger">Buy Now</button>
+            </form>
+        </div>
+    </div>
+
+
+
+    {% endblock %}
+
+
+    {% block js %}
+
+
+    <script>
+        if (localStorage.getItem('cart') == null) {
+            var cart = {};
+        } else {
+            cart = JSON.parse(localStorage.getItem('cart'));
+        }
+        ///console.log(cart);
+        var sum = 0;
+
+        var totalprice = 0;
+        if ($.isEmptyObject(cart)) {
+            str = `<p>Your cart is empty</p>`
+            $('#items').append(str);
+        } else {
+            for (item in cart) {
+                let qty = cart[item][0];
+                let name = cart[item][1];
+                let itemprice = cart[item][2];
+                sum = sum + qty;
+                totalprice = totalprice + sum * itemprice;
+                str = `<li class="list-group-item d-flex justify-content-between align-items-center">
+                    ${name}
+                    <span class="badge badge-primary badge-pill">${qty}</span>
+                </li>`
+                $('#items').append(str);
+            }
+        }
+
+
+        document.getElementById('cart').innerHTML = sum;
+        document.getElementById('totalprice').innerHTML = totalprice;
+        $('#itemsJson').val(JSON.stringify(cart));
+        {% if buy %}
+        alert('Thank You for ordering. Your order id is {{id}}. Use this id {{id}} to track your order.');
+        localStorage.clear();
+        document.location = "/shop/";
+
+        {% endif %}
+        $('#amount').val($('#totalprice').html())
+    </script>
+    {% endblock %}
